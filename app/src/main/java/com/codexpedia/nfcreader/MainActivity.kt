@@ -4,28 +4,27 @@ import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.IntentFilter
-import android.nfc.NdefMessage
-import android.nfc.NfcAdapter
-import android.nfc.Tag
+import android.nfc.*
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.codexpedia.nfcreader.databinding.ActivityMainBinding
 import java.io.UnsupportedEncodingException
 import java.nio.charset.Charset
 import kotlin.experimental.and
 
 class MainActivity : Activity() {
-    private lateinit var binding: ActivityMainBinding
+
+    lateinit var writeTagFilters: Array<IntentFilter>
     private lateinit var tvNFCContent: TextView
-    private lateinit var nfcAdapter: NfcAdapter
-    private lateinit var pendingIntent: PendingIntent
+    private lateinit var binding: ActivityMainBinding
+    var nfcAdapter: NfcAdapter? = null
+    var pendingIntent: PendingIntent? = null
     var myTag: Tag? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -39,9 +38,7 @@ class MainActivity : Activity() {
             Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show()
             finish()
         }
-
         readFromIntent(intent)
-
         pendingIntent = PendingIntent.getActivity(
             this,
             0,
@@ -50,8 +47,12 @@ class MainActivity : Activity() {
         )
         val tagDetected = IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED)
         tagDetected.addCategory(Intent.CATEGORY_DEFAULT)
+        writeTagFilters = arrayOf(tagDetected)
     }
 
+    /******************************************************************************
+     * Read From NFC Tag
+     ****************************/
     private fun readFromIntent(intent: Intent) {
         val action = intent.action
         if (NfcAdapter.ACTION_TAG_DISCOVERED == action || NfcAdapter.ACTION_TECH_DISCOVERED == action || NfcAdapter.ACTION_NDEF_DISCOVERED == action) {
@@ -86,4 +87,31 @@ class MainActivity : Activity() {
         }
         tvNFCContent.text = "Message read from NFC Tag:\n $text"
     }
+
+    override fun onNewIntent(intent: Intent) {
+        setIntent(intent)
+        readFromIntent(intent)
+        if (NfcAdapter.ACTION_TAG_DISCOVERED == intent.action) {
+            myTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
+        }
+    }
+
+    public override fun onPause() {
+        super.onPause()
+        disableForegroundDispatch()
+    }
+
+    public override fun onResume() {
+        super.onResume()
+        enableForegroundDispatch()
+    }
+
+    private fun enableForegroundDispatch() {
+        nfcAdapter!!.enableForegroundDispatch(this, pendingIntent, writeTagFilters, null)
+    }
+
+    private fun disableForegroundDispatch() {
+        nfcAdapter!!.disableForegroundDispatch(this)
+    }
 }
+
