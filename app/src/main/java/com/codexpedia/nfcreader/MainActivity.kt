@@ -38,6 +38,8 @@ class MainActivity : Activity() {
             Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show()
             finish()
         }
+
+        //This is for when the activity is launched by the intent-filter for android.nfc.action.NDEF_DISCOVERE
         readFromIntent(intent)
         pendingIntent = PendingIntent.getActivity(
             this,
@@ -88,6 +90,9 @@ class MainActivity : Activity() {
         tvNFCContent.text = "Message read from NFC Tag:\n $text"
     }
 
+    /**
+     * This is for reading the NFC when the app is already launched
+     */
     override fun onNewIntent(intent: Intent) {
         setIntent(intent)
         readFromIntent(intent)
@@ -106,10 +111,16 @@ class MainActivity : Activity() {
         enableForegroundDispatch()
     }
 
+    /**
+     * enable foreground dispatch to prevent intent-filter to launch the app again
+     */
     private fun enableForegroundDispatch() {
         nfcAdapter!!.enableForegroundDispatch(this, pendingIntent, writeTagFilters, null)
     }
 
+    /**
+     * disable foreground dispatch to allow intent-filter to launch the app
+     */
     private fun disableForegroundDispatch() {
         nfcAdapter!!.disableForegroundDispatch(this)
     }
