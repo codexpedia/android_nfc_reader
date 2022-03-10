@@ -1,5 +1,6 @@
 package com.codexpedia.nfcreader
 
+import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.IntentFilter
@@ -17,7 +18,7 @@ import java.io.UnsupportedEncodingException
 import java.nio.charset.Charset
 import kotlin.experimental.and
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : Activity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var tvNFCContent: TextView
     private lateinit var nfcAdapter: NfcAdapter
