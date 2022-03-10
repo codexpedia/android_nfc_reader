@@ -51,11 +51,6 @@ class MainActivity : AppCompatActivity() {
         tagDetected.addCategory(Intent.CATEGORY_DEFAULT)
     }
 
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        readFromIntent(intent)
-    }
-
     private fun readFromIntent(intent: Intent) {
         val action = intent.action
         if (NfcAdapter.ACTION_TAG_DISCOVERED == action || NfcAdapter.ACTION_TECH_DISCOVERED == action || NfcAdapter.ACTION_NDEF_DISCOVERED == action) {
